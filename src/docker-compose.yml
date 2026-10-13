@@ -1,19 +1,19 @@
 services:
   mysql:
-    container_name: mysql-clienteveiculo
+    container_name: mysql-ositemestoque
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: clienteveiculoservice
-      MYSQL_DATABASE: ClienteVeiculo
+      MYSQL_ROOT_PASSWORD: ositemestoqueservice
+      MYSQL_DATABASE: OsItemEstoque
       MYSQL_USER: appuser
-      MYSQL_PASSWORD: clienteveiculoservice
+      MYSQL_PASSWORD: ositemestoqueservice
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data_ositemestoque:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uappuser", "-pclienteveiculoservice"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uappuser", "-positemestoqueservice"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -37,4 +37,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  mysql_data:
+  mysql_data_ositemestoque:

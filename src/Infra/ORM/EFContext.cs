@@ -11,6 +11,7 @@ public class EFContext : DbContext
      public DbSet<OrdemServico> OrdemServicos { get; set; }
     public DbSet<Servico> Servicos { get; set; }
     public DbSet<OrdemServicoItemEstoque> OrdemServicoItensEstoque { get; set; }
+
     public EFContext(DbContextOptions<EFContext> options) : base(options)
     {
 
