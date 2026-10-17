@@ -1,5 +1,5 @@
 services:
-  mysql:
+  mysql-ositemestoque:
     container_name: mysql-ositemestoque
     image: mysql:8.0
     restart: unless-stopped
@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 20
 
-  clienteveiculo-service:
+  ositemestoque-service:
     build:
       context: .
       dockerfile: Dockerfile   # se o Dockerfile está na raiz

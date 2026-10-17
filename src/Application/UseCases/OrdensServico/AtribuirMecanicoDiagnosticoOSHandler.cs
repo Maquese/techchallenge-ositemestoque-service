@@ -19,9 +19,7 @@ public class AtribuirMecanicoDiagnosticoOSHandler
     }
 
     public async Task<BaseResponse> Handle(AtribuiMecanicoRequest atribuiEmDiagnostico)
-    {
-
-        
+    {        
         var ordemServico = await _ordemServicoRepository.ObterPorId(atribuiEmDiagnostico.OrdemServicoId);
         if (ordemServico == null)
         {

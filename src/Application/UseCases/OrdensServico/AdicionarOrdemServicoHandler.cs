@@ -7,20 +7,30 @@ using Domain.Exceptions;
 using Application.Interfaces;
 //using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Formats.Asn1;
+using Microsoft.Extensions.Configuration;
+using System.Net.Http.Json;
 
 namespace Application.UseCases.OrdensServico;
 
 public class AdicionarOrdemServicoHandler
 {
+    private readonly IConfiguration _configuration;
+    private readonly HttpClient _httpClient;
+
     //private readonly VeiculoRepository _veiculoRepository;
     private readonly ServicoRepository _servicoRepository;
     private readonly OrdemServicoRepository _ordemServicoRepository;
     //private readonly ILogger<AdicionarOrdemServicoHandler> _logger;
 
     public AdicionarOrdemServicoHandler(ServicoRepository servicoRepository, 
-                                        OrdemServicoRepository ordemServicoRepository)
+                                        OrdemServicoRepository ordemServicoRepository,
+                                         HttpClient httpClient, IConfiguration configuration)
     {
-       
+        _configuration = configuration;
+       _httpClient = httpClient;
         _servicoRepository = servicoRepository;
         _ordemServicoRepository = ordemServicoRepository;
         
@@ -28,6 +38,13 @@ public class AdicionarOrdemServicoHandler
     
     public async Task<BaseResponse> Handle(AddOrdemServicoRequest ordemServico)
     {
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true // Ignora maiúsculas/minúsculas
+        };
+
+        var data = await _httpClient.GetFromJsonAsync<VeiculoExisteResponse>($"{_configuration.GetSection("ClienteService").Value}api/Cliente/BuscarVeiculoPorId?id={ordemServico.VeiculoId}",jsonOptions);
+        
         // using var scope = _logger.BeginScope(
         //     "correlation_id={CorrelationId} event_type={EventType} operation={Operation} vehicle_id={VehicleId} status={Status}",
         //     Activity.Current?.TraceId.ToString() ?? "n/a",
@@ -46,15 +63,15 @@ public class AdicionarOrdemServicoHandler
 
         // var veiculo = await _veiculoRepository.ObterPorId(ordemServico.VeiculoId);
 
-        // if (veiculo == null)
-        // {
-        //     _logger.LogWarning(
-        //         "Falha ao criar ordem de serviço: veículo não encontrado. VehicleId: {VehicleId}",
-        //         ordemServico.VeiculoId);
+        if (!data.Data.Existe)
+        {
+            // _logger.LogWarning(
+            //     "Falha ao criar ordem de serviço: veículo não encontrado. VehicleId: {VehicleId}",
+            //     ordemServico.VeiculoId);
 
-        //     throw new DomainException(
-        //         $"Veículo com ID {ordemServico.VeiculoId} não encontrado.");
-        // }
+            throw new DomainException(
+                $"Veículo com ID {ordemServico.VeiculoId} não encontrado.");
+        }
 
         var ordemServicoEntity = new OrdemServico(
             ordemServico.VeiculoId,

@@ -7,11 +7,18 @@ using Application.Interfaces;
 using Application.Models.Responses;
 //using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using System.Net.Http.Json;
+using System.Text;
+using System.Formats.Asn1;
 
 namespace Application.UseCases.OrdensServico;
 
 public class FinalizarDiagnosticoOSHandler
 {
+    private readonly IConfiguration _configuration;
+    private readonly HttpClient _httpClient;
     private readonly OrdemServicoRepository _ordemServicoRepository;
     private readonly ServicoRepository _servicoRepository;
     private readonly ItemEstoqueRepository _itensEstoqueRepository;
@@ -20,10 +27,14 @@ public class FinalizarDiagnosticoOSHandler
 
     public FinalizarDiagnosticoOSHandler(OrdemServicoRepository ordemServicoRepository, 
                                          ServicoRepository servicoRepository, 
-                                         ItemEstoqueRepository itensEstoqueRepository) 
+                                         ItemEstoqueRepository itensEstoqueRepository, 
+                                         HttpClient httpClient,
+                                         IConfiguration configuration)
                                          //OrcamentoRepository orcamentoRepository,
                                          //ILogger<FinalizarDiagnosticoOSHandler> logger)
     {
+        _configuration = configuration;
+        _httpClient = httpClient;
         _ordemServicoRepository = ordemServicoRepository;
         _servicoRepository = servicoRepository;
         _itensEstoqueRepository = itensEstoqueRepository;
@@ -63,7 +74,16 @@ public class FinalizarDiagnosticoOSHandler
             throw new DomainException($"Um ou mais itens de estoque informados não estão mais disponíveis.");
         }
 
+        var valor = await CalcularValorTotalOrcamento(
+                diagnosticoFinalizadoModel.ItensEstoque,
+                ordemServico.Servicos?.Select(x => x.Id).ToList() ?? new List<int>());
+
         ordemServico.OSDiagnosticada(itensEstoque);
+
+        var post = await _httpClient.PostAsJsonAsync($"{_configuration.GetSection("OrcamentoService").Value}api/Orcamento/CriarOrcamento",
+         new AddOrcamentoRequest { Observacao = diagnosticoFinalizadoModel.Observacao, OrdemServicoId  = ordemServico.Id, ValorTotal = valor});
+
+        var response = await post.Content.ReadAsStringAsync();
         //_logger.LogInformation(
         //    "Diagnóstico finalizado {@Diagnosis}",
         //    new
@@ -75,10 +95,7 @@ public class FinalizarDiagnosticoOSHandler
         //    });
         // var orcamento = new Orcamento(
         //     diagnosticoFinalizadoModel.Id,
-        //     await CalcularValorTotalOrcamento(
-        //         diagnosticoFinalizadoModel.ItensEstoque,
-        //         ordemServico.Servicos?.Select(x => x.Id).ToList() ?? new List<int>()),
-        //     "obs");
+        //     
         //aqui tem que fazer um achamada para o servico de ORCAMENTO
         await _ordemServicoRepository.Atualizar(ordemServico);
         //await _orcamentoRepository.Adicionar(orcamento);

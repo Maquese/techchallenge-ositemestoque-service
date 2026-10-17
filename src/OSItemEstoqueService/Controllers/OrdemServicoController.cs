@@ -30,12 +30,14 @@ namespace AutoReparaAPI.Controllers
             return Ok(await atribuirMecanicoEmDiagnosticoHandler.Handle(atribuiEmDiagnostico));
         }
 
+
         [HttpPost]
         public async Task<IActionResult> DiagnosticoFInalizado([FromServices]FinalizarDiagnosticoOSHandler diagnosticoFinalizadoHandler, [FromBody] DiagnosticoFinalizadoRequest diagnosticoFinalizadoModel)
         {
             return Ok(await diagnosticoFinalizadoHandler.Handle(diagnosticoFinalizadoModel));
         }
 
+        //preciso que o orcamento avise quando aprovada
         [HttpPost]
         public async Task<IActionResult> AtribuirMecanicoEmExecucao([FromServices]AtribuirMecanicoExecucaoOSHandler atribuirMecanicoExecucaoOSHandler, [FromBody] AtribuiMecanicoRequest atribuiEmExecucao)
         {            
@@ -48,6 +50,8 @@ namespace AutoReparaAPI.Controllers
             return Ok( await finalizarOrdemServicoHandler.Handle(ordemServicoId));
         }
 
+
+        ///esse endpoint n é mais possivel dessa forma
         [HttpGet]
         public async Task<IActionResult> StatusAtualOrdensServicoCliente([FromServices]StatusAtualOSClienteHandler statusAtualOrdensServicoClienteHandler, [FromQuery] int clienteId)
         {
@@ -87,6 +91,7 @@ namespace AutoReparaAPI.Controllers
         
 
 
+        #region Serviços 
         [HttpPost]
         public async Task<IActionResult> AdicionarServico([FromServices]AdicionarServicoHandler adicionarServicoOSHandler, [FromBody] AddServicoRequest servicoModel)
         {
@@ -121,5 +126,7 @@ namespace AutoReparaAPI.Controllers
             var servicos = await listarServicosAtivosHandler.Handle();
             return Ok(servicos);
         }
+
+        #endregion
     }
 }

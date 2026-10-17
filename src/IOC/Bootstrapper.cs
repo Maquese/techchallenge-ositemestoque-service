@@ -37,6 +37,7 @@ Console.WriteLine($"Using connection string: {connStr}");
             dbContext.Database.Migrate();
 
 
+            services.AddScoped<HttpClient>();
             services.AddTransient<ItemEstoqueRepository, ItemEstoqueRepositoryImp>();
             services.AddTransient<OrdemServicoRepository, OrdemServicoRepositoryImp>();
             services.AddTransient<ServicoRepository, ServicoRepositoryImp>();
