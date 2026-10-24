@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Net.Http.Json;
 using System.Text;
 using System.Formats.Asn1;
+using System.Text.Json.Serialization;
 
 namespace Application.UseCases.OrdensServico;
 
@@ -82,8 +83,11 @@ public class FinalizarDiagnosticoOSHandler
 
         var post = await _httpClient.PostAsJsonAsync($"{_configuration.GetSection("OrcamentoService").Value}api/Orcamento/CriarOrcamento",
          new AddOrcamentoRequest { Observacao = diagnosticoFinalizadoModel.Observacao, OrdemServicoId  = ordemServico.Id, ValorTotal = valor});
-
-        var response = await post.Content.ReadAsStringAsync();
+          var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true // Ignora maiúsculas/minúsculas
+        };
+        var response = JsonSerializer.Deserialize<BaseResponse>(await post.Content.ReadAsStringAsync(),jsonOptions);
         //_logger.LogInformation(
         //    "Diagnóstico finalizado {@Diagnosis}",
         //    new
@@ -113,7 +117,7 @@ public class FinalizarDiagnosticoOSHandler
         {
             Success = true,
             Message = $"Ordem de servico id:{ordemServico.Id} status aguardando aprovação, orçamento id:{"orcamento.Id"} cridado",
-            Data = "orcamento.Id"
+            Data = response.Data
         };
     }
 

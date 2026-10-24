@@ -1,13 +1,11 @@
 namespace Application.Models.Responses;
 
-public class OrcamentoAprovadoResponse
+public class OrcamentoAprovadoResponse : BaseResponse
 {
-     public bool success { get; set; }
-    public string message { get; set; }
-    public Status data {get;set;} 
+    public Status Data {get;set;} 
     public class Status
     {
-        public bool orcamentoAprovado { get; set; }
+        public bool OrcamentoAprovado { get; set; }
     }
 }
 

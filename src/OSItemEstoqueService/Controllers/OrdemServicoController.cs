@@ -37,7 +37,7 @@ namespace AutoReparaAPI.Controllers
             return Ok(await diagnosticoFinalizadoHandler.Handle(diagnosticoFinalizadoModel));
         }
 
-        //preciso que o orcamento avise quando aprovada
+
         [HttpPost]
         public async Task<IActionResult> AtribuirMecanicoEmExecucao([FromServices]AtribuirMecanicoExecucaoOSHandler atribuirMecanicoExecucaoOSHandler, [FromBody] AtribuiMecanicoRequest atribuiEmExecucao)
         {            

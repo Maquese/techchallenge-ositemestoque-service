@@ -70,7 +70,7 @@ public class AdicionarOrdemServicoHandler
             //     ordemServico.VeiculoId);
 
             throw new DomainException(
-                $"Veículo com ID {ordemServico.VeiculoId} não encontrado.");
+                $"Veículo com ID {ordemServico.VeiculoId} não encotnrado.");
         }
 
         var ordemServicoEntity = new OrdemServico(

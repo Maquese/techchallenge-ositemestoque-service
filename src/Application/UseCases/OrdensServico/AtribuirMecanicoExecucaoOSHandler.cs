@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 //using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace Application.UseCases.OrdensServico;
@@ -34,15 +35,16 @@ public class AtribuirMecanicoExecucaoOSHandler
         {
             throw new DomainException($"Ordem de serviço com ID {atribuiEmReparo.OrdemServicoId} não encontrada.");
         }
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true // Ignora maiúsculas/minúsculas
+        };
 
-
-        var statusAprovada = await _httpClient.GetAsync($"{_configuration.GetSection("OrcamentoService").Value}api/Orcamento/OrcamentoAprovado?ordemservicoid={atribuiEmReparo.OrdemServicoId}");
+        var statusAprovada = await _httpClient.GetFromJsonAsync<OrcamentoAprovadoResponse>($"{_configuration.GetSection("OrcamentoService").Value}api/Orcamento/OrcamentoAprovado?ordemservicoid={atribuiEmReparo.OrdemServicoId}",jsonOptions);
         
-        var status = JsonSerializer.Deserialize<OrcamentoAprovadoResponse>(await statusAprovada.Content.ReadAsStringAsync());
-        // if (ordemServico.Status != "Aprovada")
-        // {
-        //     throw new DomainException($"Ordem de serviço com ID {ordemServico.Id} não está no status 'Aprovada' para atribuição de mecânico à execução.");
-        // }
+       if (!statusAprovada.Data.OrcamentoAprovado)
+            throw new DomainException($"Ordem de serviço com ID {ordemServico.Id} não está no status 'Aprovada' para atribuição de mecânico à execução.");
+        
         // using var scope = _logger.BeginScope(
         //     "correlation_id={CorrelationId} event_type={EventType} operation={Operation} order_id={OrderId} vehicle_id={VehicleId} status={Status}",
         //     Activity.Current?.TraceId.ToString() ?? "n/a",
