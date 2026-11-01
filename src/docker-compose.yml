@@ -1,0 +1,40 @@
+services:
+  mysql-ositemestoque:
+    container_name: mysql-ositemestoque
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ositemestoqueservice
+      MYSQL_DATABASE: OsItemEstoque
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: ositemestoqueservice
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_ositemestoque:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uappuser", "-positemestoqueservice"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  ositemestoque-service:
+    build:
+      context: .
+      dockerfile: Dockerfile   # se o Dockerfile está na raiz
+    #depends_on:
+    #  mysql:
+    #    condition: service_healthy
+    ports:
+      - "80:80"
+    # environment:
+    #   ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=ClienteVeiculo;User=root;Password=clienteveiculoservice;"
+    #   Jwt__SecretKey: "sua-chave-super-secreta-muito-longa-para-256bits-change-me"
+    #   Jwt__Issuer: "GestaoAutoRepara"
+    #   Jwt__Audience: "GestaoAutoReparaUsers"
+    #   Jwt__ExpirationMinutes: "60"
+    #   ASPNETCORE_URLS: "http://+:80"
+    restart: unless-stopped
+
+volumes:
+  mysql_data_ositemestoque:
