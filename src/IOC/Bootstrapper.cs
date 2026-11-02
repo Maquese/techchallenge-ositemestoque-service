@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Application.UseCases.ItensEstoque;
 using Application.UseCases.OrdensServico;
+using Application.Services;
 //using Application.Controllers;
 
 namespace IOC;
@@ -42,6 +43,8 @@ namespace IOC;
             services.AddTransient<OrdemServicoRepository, OrdemServicoRepositoryImp>();
             services.AddTransient<ServicoRepository, ServicoRepositoryImp>();
             services.AddScoped<AdicionarOrdemServicoHandler>();
+            services.AddScoped<AbrirOrdemServicoSagaService>();
+            services.AddScoped<Application.Controllers.OrdemServicoAppController>();
             services.AddScoped<AdicionarItemEstoqueHandler>();
 
             services.AddScoped<ConsutaStatusOSHandler>();
