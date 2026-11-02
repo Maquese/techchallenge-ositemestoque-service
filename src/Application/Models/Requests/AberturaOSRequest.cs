@@ -2,14 +2,14 @@
 
 public class AberturaOSRequest
 {
-    public string Documento { get; set; }
-    public string Nome { get; set; }
-    public string Email { get; set; }
-    public string Celular { get; set; }
-    public string Placa { get; set; }
-    public string Modelo { get; set; }
-    public string Marca { get; set; }
+    public string Documento { get; set; } = string.Empty;
+    public string Nome { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Celular { get; set; } = string.Empty;
+    public string Placa { get; set; } = string.Empty;
+    public string Modelo { get; set; } = string.Empty;
+    public string Marca { get; set; } = string.Empty;
     public int Ano { get; set; }
-    public List<int> ServicosIds { get; set; }
+    public List<int> ServicosIds { get; set; } = [];
     
 }

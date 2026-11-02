@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Application.UseCases.OrdensServico;
 using Application.Models.Requests;
-//using Application.Controllers;
+using Application.Controllers;
 
 namespace AutoReparaAPI.Controllers
 {
@@ -15,6 +15,16 @@ namespace AutoReparaAPI.Controllers
         public OrdemServicoController()
         {
             
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AberturaOS(
+            [FromServices] OrdemServicoAppController ordemServicoAppController,
+            [FromBody] AberturaOSRequest request,
+            CancellationToken cancellationToken)
+        {
+            var response = await ordemServicoAppController.AbrirOrdemServico(request, cancellationToken);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -73,14 +83,6 @@ namespace AutoReparaAPI.Controllers
         }
 
         
-        // [HttpPost]
-        // public  async Task<IActionResult> AberturaOS([FromServices]OrdemServicoAppController ordemServicoAppController,[FromBody] AberturaOSRequest request)
-        // {
-        //     var response = await ordemServicoAppController.AbrirOrdemServico(request);
-        //     return Ok(response);
-        // }
-        
-
         [HttpGet]
         public async Task<IActionResult> ConsultaStatusOrdemServico([FromServices]ConsutaStatusOSHandler consultaStatusOSHandler, [FromQuery]int ordemServicoId)
         {
