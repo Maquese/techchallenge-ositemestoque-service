@@ -7,27 +7,29 @@ using Microsoft.Extensions.DependencyInjection;
 using Application.UseCases.ItensEstoque;
 using Application.UseCases.OrdensServico;
 using Application.Services;
+using System.Diagnostics.CodeAnalysis;
 //using Application.Controllers;
 
 namespace IOC;
 
+[ExcludeFromCodeCoverage]
  public static class BootStrapper
     {
         public static void AddAppServices(this IServiceCollection services, IConfiguration configuration)
         {
             //services.AddScoped<AuthService>();
 
-            var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-                ?? configuration["ConnectionStrings:DefaultConnection"]
-                ?? configuration.GetConnectionString("DefaultConnection");
+            // var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+            //     ?? configuration["ConnectionStrings:DefaultConnection"]
+            //     ?? configuration.GetConnectionString("DefaultConnection");
 
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new InvalidOperationException("A connection string 'DefaultConnection' must be configured.");
-            }
+            // if (string.IsNullOrWhiteSpace(connectionString))
+            // {
+            //     throw new InvalidOperationException("A connection string 'DefaultConnection' must be configured.");
+            // }
             
-            Console.WriteLine($"Using connection string: {connectionString}");
-            // string connStr = "Server=localhost;Port=3306;Database=OsItemEstoque;User=appuser;Password=ositemestoqueservice;";
+            //Console.WriteLine($"Using connection string: {connectionString}");
+            string connectionString = "Server=localhost;Port=3306;Database=OsItemEstoque;User=appuser;Password=ositemestoqueservice;";
             //string connStr = "Server=mysql-ositemestoque;Port=3306;Database=OsItemEstoque;User=appuser;Password=ositemestoqueservice;";
             //Console.WriteLine($"Using connection string: {connStr}");
             services.AddDbContext<EFContext>(options =>
