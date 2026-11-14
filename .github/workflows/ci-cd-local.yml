@@ -33,7 +33,8 @@ jobs:
             /k:"OSItemEstoque" \
             /d:sonar.host.url="$SONAR_HOST_URL" \
             /d:sonar.token="$SONAR_TOKEN" \
-            /d:sonar.cs.opencover.reportsPaths="**/TestResults/coverage.xml"
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/coverage.xml" \
+            /d:sonar.coverage.exclusions="OSItemEstoqueService/Program.cs"
 
       - name: Build da solução
         working-directory: src
