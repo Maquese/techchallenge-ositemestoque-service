@@ -127,9 +127,8 @@ public class AbrirOrdemServicoSagaService
         catch (Exception operationException)
         {
             var compensationExceptions = new List<Exception>();
-            for (var index = compensations.Count - 1; index >= 0; index--)
+            foreach (var compensation in compensations.AsEnumerable().Reverse())
             {
-                var compensation = compensations[index];
                 try
                 {
                     await compensation.Execute();

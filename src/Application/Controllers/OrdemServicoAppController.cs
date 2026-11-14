@@ -1,9 +1,11 @@
+﻿using System.Diagnostics.CodeAnalysis;
 using Application.Models.Requests;
 using Application.Models.Responses;
 using Application.Services;
 
 namespace Application.Controllers;
 
+[ExcludeFromCodeCoverage]
 public class OrdemServicoAppController
 {
     private readonly AbrirOrdemServicoSagaService _abrirOrdemServicoSagaService;

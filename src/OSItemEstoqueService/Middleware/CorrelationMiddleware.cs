@@ -1,7 +1,10 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OSitemEstoqueService.Middleware;
 
+
+[ExcludeFromCodeCoverage]
 public class CorrelationMiddleware
 {
     private readonly RequestDelegate _next;

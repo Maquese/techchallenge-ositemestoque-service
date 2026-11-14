@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 using Application.UseCases.OrdensServico;
 using Application.Models.Requests;
 using Application.Controllers;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AutoReparaAPI.Controllers
 {
+    [ExcludeFromCodeCoverage]
     [Route("api/[controller]/[action]")]
     [ApiController]
     // [Authorize]

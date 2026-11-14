@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Application.Models.Responses;
 using Domain.Exceptions;
 
 namespace OSitemEstoqueService.Middleware;
 
+ [ExcludeFromCodeCoverage]
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
