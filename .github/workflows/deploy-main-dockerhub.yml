@@ -50,3 +50,8 @@ jobs:
         run: |
           docker push ${DOCKERHUB_IMAGE}:latest
           docker push ${DOCKERHUB_IMAGE}:${DOCKERHUB_TAG}
+
+      - name: Atualizar Deployment no Kubernetes
+        run: |
+          kubectl rollout restart deployment/ositemestoque-service
+          kubectl rollout status deployment/ositemestoque-service --timeout=180s

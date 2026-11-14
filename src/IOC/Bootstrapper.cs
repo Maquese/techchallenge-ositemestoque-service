@@ -19,19 +19,19 @@ namespace IOC;
         {
             //services.AddScoped<AuthService>();
 
-            // var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            //     ?? configuration["ConnectionStrings:DefaultConnection"]
-            //     ?? configuration.GetConnectionString("DefaultConnection");
+            var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+                ?? configuration["ConnectionStrings:DefaultConnection"]
+                ?? configuration.GetConnectionString("DefaultConnection");
 
-            // if (string.IsNullOrWhiteSpace(connectionString))
-            // {
-            //     throw new InvalidOperationException("A connection string 'DefaultConnection' must be configured.");
-            // }
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException("A connection string 'DefaultConnection' must be configured.");
+            }
             
-            //Console.WriteLine($"Using connection string: {connectionString}");
-            string connectionString = "Server=localhost;Port=3306;Database=OsItemEstoque;User=appuser;Password=ositemestoqueservice;";
+            
+            //string connectionString = "Server=localhost;Port=3306;Database=OsItemEstoque;User=appuser;Password=ositemestoqueservice;";
             //string connStr = "Server=mysql-ositemestoque;Port=3306;Database=OsItemEstoque;User=appuser;Password=ositemestoqueservice;";
-            //Console.WriteLine($"Using connection string: {connStr}");
+            Console.WriteLine($"Using connection string: {connectionString}");
             services.AddDbContext<EFContext>(options =>
                 options.UseMySQL(connectionString));
             using var serviceProvider = services.BuildServiceProvider();
