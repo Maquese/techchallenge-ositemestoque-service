@@ -7,6 +7,7 @@ using Application.Tests;
 using Application.UseCases.OrdensServico;
 using Domain.Aggregates;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Reqnroll;
 
@@ -114,12 +115,14 @@ public sealed class AbrirOrdemServicoSteps
             servicoRepository.Object,
             _ordemRepository.Object,
             vehicleLookupHttpClient,
-            configuration.Object);
+            configuration.Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
         var service = new AbrirOrdemServicoSagaService(
             configuration.Object,
             sagaHttpClient,
             adicionarOrdemServicoHandler,
-            _ordemRepository.Object);
+            _ordemRepository.Object,
+            NullLogger<AbrirOrdemServicoSagaService>.Instance);
 
         _exception = await Record.ExceptionAsync(() =>
             service.Handle(new AberturaOSRequest { ServicosIds = [3] }));

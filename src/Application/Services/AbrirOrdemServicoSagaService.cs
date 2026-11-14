@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Application.Models.Requests;
 using Application.Models.Responses;
 using Application.UseCases.OrdensServico;
@@ -20,17 +22,20 @@ public class AbrirOrdemServicoSagaService
     private readonly HttpClient _httpClient;
     private readonly AdicionarOrdemServicoHandler _adicionarOrdemServicoHandler;
     private readonly OrdemServicoRepository _ordemServicoRepository;
+    private readonly ILogger<AbrirOrdemServicoSagaService> _logger;
 
     public AbrirOrdemServicoSagaService(
         IConfiguration configuration,
         HttpClient httpClient,
         AdicionarOrdemServicoHandler adicionarOrdemServicoHandler,
-        OrdemServicoRepository ordemServicoRepository)
+        OrdemServicoRepository ordemServicoRepository,
+        ILogger<AbrirOrdemServicoSagaService> logger)
     {
         _configuration = configuration;
         _httpClient = httpClient;
         _adicionarOrdemServicoHandler = adicionarOrdemServicoHandler;
         _ordemServicoRepository = ordemServicoRepository;
+        _logger = logger;
     }
 
     public async Task<BaseResponse> Handle(
@@ -38,6 +43,21 @@ public class AbrirOrdemServicoSagaService
         CancellationToken cancellationToken = default)
     {
         var compensations = new List<(string Name, Func<Task> Execute)>();
+
+        using var scope = _logger.BeginScope(
+            "correlation_id={CorrelationId} event_type={EventType} operation={Operation} status={Status}",
+            Activity.Current?.TraceId.ToString() ?? "n/a",
+            "order_processing",
+            "open_order_saga",
+            "in_progress");
+
+        _logger.LogInformation(
+            "Iniciando abertura da ordem de serviço {@OrderOpeningContext}",
+            new
+            {
+                Operation = "open_order_saga",
+                ServiceIds = request.ServicosIds
+            });
 
         try
         {
@@ -52,6 +72,9 @@ public class AbrirOrdemServicoSagaService
                     Celular = request.Celular
                 },
                 cancellationToken);
+            _logger.LogInformation(
+                "Cliente criado durante abertura da ordem de serviço. CustomerId: {CustomerId}",
+                clienteId);
             compensations.Add(("inativar cliente", () => DeleteAsync(
                 "ClienteService",
                 $"api/Cliente/InativarCliente?id={clienteId}",
@@ -69,6 +92,10 @@ public class AbrirOrdemServicoSagaService
                     ClienteId = clienteId
                 },
                 cancellationToken);
+            _logger.LogInformation(
+                "Veículo criado durante abertura da ordem de serviço. VehicleId: {VehicleId}, CustomerId: {CustomerId}",
+                veiculoId,
+                clienteId);
             compensations.Add(("inativar veículo", () => DeleteAsync(
                 "ClienteService",
                 $"api/Cliente/InativarVeiculo?id={veiculoId}",
@@ -80,6 +107,10 @@ public class AbrirOrdemServicoSagaService
                 VeiculoId = veiculoId
             });
             var ordemServicoId = ReadIntId(ordemServico.Data, "ordem de serviço");
+            _logger.LogInformation(
+                "Ordem de serviço criada na saga. OrderId: {OrderId}, VehicleId: {VehicleId}",
+                ordemServicoId,
+                veiculoId);
             compensations.Add(("remover ordem de serviço", async () =>
             {
                 var entidade = await _ordemServicoRepository.ObterPorId(ordemServicoId);
@@ -116,6 +147,11 @@ public class AbrirOrdemServicoSagaService
                     Observacao = $"Orçamento inicial da ordem de serviço {ordemServicoId}."
                 },
                 cancellationToken);
+            _logger.LogInformation(
+                "Orçamento criado para a ordem de serviço. BudgetId: {BudgetId}, OrderId: {OrderId}, Total: {Total}",
+                orcamentoId,
+                ordemServicoId,
+                valorTotal.Value);
             compensations.Add(("negar orçamento", () => PostWithoutResponseAsync(
                 "OrcamentoService",
                 "api/Orcamento/NegarOrcamento",
@@ -126,15 +162,27 @@ public class AbrirOrdemServicoSagaService
         }
         catch (Exception operationException)
         {
+            _logger.LogError(
+                operationException,
+                "Falha ao abrir ordem de serviço. Iniciando execução de {CompensationCount} compensações.",
+                compensations.Count);
+
             var compensationExceptions = new List<Exception>();
             foreach (var compensation in compensations.AsEnumerable().Reverse())
             {
                 try
                 {
                     await compensation.Execute();
+                    _logger.LogInformation(
+                        "Compensação executada com sucesso: {CompensationName}",
+                        compensation.Name);
                 }
                 catch (Exception compensationException)
                 {
+                    _logger.LogError(
+                        compensationException,
+                        "Falha ao executar compensação: {CompensationName}",
+                        compensation.Name);
                     compensationExceptions.Add(new InvalidOperationException(
                         $"A compensação '{compensation.Name}' falhou.",
                         compensationException));

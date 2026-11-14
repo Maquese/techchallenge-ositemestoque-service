@@ -5,7 +5,7 @@ using Domain.Aggregates;
 using Domain.Entidades;
 using Domain.Exceptions;
 using Application.Interfaces;
-//using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using System.Text.Json;
@@ -19,21 +19,20 @@ public class AdicionarOrdemServicoHandler
 {
     private readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
-
-    //private readonly VeiculoRepository _veiculoRepository;
     private readonly ServicoRepository _servicoRepository;
     private readonly OrdemServicoRepository _ordemServicoRepository;
-    //private readonly ILogger<AdicionarOrdemServicoHandler> _logger;
+    private readonly ILogger<AdicionarOrdemServicoHandler> _logger;
 
     public AdicionarOrdemServicoHandler(ServicoRepository servicoRepository, 
                                         OrdemServicoRepository ordemServicoRepository,
-                                         HttpClient httpClient, IConfiguration configuration)
+                                         HttpClient httpClient, IConfiguration configuration,
+                                         ILogger<AdicionarOrdemServicoHandler> logger)
     {
         _configuration = configuration;
-       _httpClient = httpClient;
+        _httpClient = httpClient;
         _servicoRepository = servicoRepository;
         _ordemServicoRepository = ordemServicoRepository;
-        
+        _logger = logger;
     }
     
     public async Task<BaseResponse> Handle(AddOrdemServicoRequest ordemServico)
@@ -45,29 +44,27 @@ public class AdicionarOrdemServicoHandler
 
         var data = await _httpClient.GetFromJsonAsync<VeiculoExisteResponse>($"{_configuration.GetSection("ClienteService").Value}api/Cliente/BuscarVeiculoPorId?id={ordemServico.VeiculoId}",jsonOptions);
         
-        // using var scope = _logger.BeginScope(
-        //     "correlation_id={CorrelationId} event_type={EventType} operation={Operation} vehicle_id={VehicleId} status={Status}",
-        //     Activity.Current?.TraceId.ToString() ?? "n/a",
-        //     "order_processing",
-        //     "create_order",
-        //     ordemServico.VeiculoId,
-        //     "pending");
+        using var scope = _logger.BeginScope(
+            "correlation_id={CorrelationId} event_type={EventType} operation={Operation} vehicle_id={VehicleId} status={Status}",
+            Activity.Current?.TraceId.ToString() ?? "n/a",
+            "order_processing",
+            "create_order",
+            ordemServico.VeiculoId,
+            "pending");
 
-        // _logger.LogInformation(
-        //     "Ordem de serviço em criação {@OrderCreateContext}",
-        //     new
-        //     {
-        //         VehicleId = ordemServico.VeiculoId,
-        //         Operation = "create_order"
-        //     });
-
-        // var veiculo = await _veiculoRepository.ObterPorId(ordemServico.VeiculoId);
+        _logger.LogInformation(
+            "Ordem de serviço em criação {@OrderCreateContext}",
+            new
+            {
+                VehicleId = ordemServico.VeiculoId,
+                Operation = "create_order"
+            });
 
         if (!data.Data.Existe)
         {
-            // _logger.LogWarning(
-            //     "Falha ao criar ordem de serviço: veículo não encontrado. VehicleId: {VehicleId}",
-            //     ordemServico.VeiculoId);
+            _logger.LogWarning(
+                "Falha ao criar ordem de serviço: veículo não encontrado. VehicleId: {VehicleId}",
+                ordemServico.VeiculoId);
 
             throw new DomainException(
                 $"Veículo com ID {ordemServico.VeiculoId} não encotnrado.");
@@ -81,15 +78,15 @@ public class AdicionarOrdemServicoHandler
 
         await _ordemServicoRepository.Adicionar(ordemServicoEntity);
 
-        // _logger.LogInformation(
-        //     "Ordem de serviço criada com sucesso {@Order}",
-        //     new
-        //     {
-        //         OrderId = ordemServicoEntity.Id,
-        //         VehicleId = ordemServicoEntity.VeiculoId,
-        //         Status = ordemServicoEntity.Status,
-        //         Data = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-        //     });
+        _logger.LogInformation(
+            "Ordem de serviço criada com sucesso {@Order}",
+            new
+            {
+                OrderId = ordemServicoEntity.Id,
+                VehicleId = ordemServicoEntity.VeiculoId,
+                Status = ordemServicoEntity.Status,
+                Data = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            });
 
         return new BaseResponse
         {

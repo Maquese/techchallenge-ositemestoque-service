@@ -13,6 +13,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Formats.Asn1;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Application.UseCases.OrdensServico;
 
@@ -23,24 +24,21 @@ public class FinalizarDiagnosticoOSHandler
     private readonly OrdemServicoRepository _ordemServicoRepository;
     private readonly ServicoRepository _servicoRepository;
     private readonly ItemEstoqueRepository _itensEstoqueRepository;
-    //private readonly OrcamentoRepository _orcamentoRepository;
-    //private readonly ILogger<FinalizarDiagnosticoOSHandler> _logger;
+    private readonly ILogger<FinalizarDiagnosticoOSHandler> _logger;
 
     public FinalizarDiagnosticoOSHandler(OrdemServicoRepository ordemServicoRepository, 
                                          ServicoRepository servicoRepository, 
                                          ItemEstoqueRepository itensEstoqueRepository, 
                                          HttpClient httpClient,
-                                         IConfiguration configuration)
-                                         //OrcamentoRepository orcamentoRepository,
-                                         //ILogger<FinalizarDiagnosticoOSHandler> logger)
+                                         IConfiguration configuration,
+                                         ILogger<FinalizarDiagnosticoOSHandler> logger)
     {
         _configuration = configuration;
         _httpClient = httpClient;
         _ordemServicoRepository = ordemServicoRepository;
         _servicoRepository = servicoRepository;
         _itensEstoqueRepository = itensEstoqueRepository;
-        //_orcamentoRepository = orcamentoRepository; 
-        //_logger = logger;
+        _logger = logger;
     }
 
       public async Task<BaseResponse> Handle(DiagnosticoFinalizadoRequest diagnosticoFinalizadoModel)
@@ -51,14 +49,14 @@ public class FinalizarDiagnosticoOSHandler
             throw new DomainException($"Ordem de serviço para o veículo ID {diagnosticoFinalizadoModel.Id} não encontrada.");
         }
 
-        //using var scope = _logger.BeginScope(
-        //    "correlation_id={CorrelationId} event_type={EventType} operation={Operation} order_id={OrderId} vehicle_id={VehicleId} status={Status}",
-        //    Activity.Current?.TraceId.ToString() ?? "n/a",
-        //    "order_processing",
-        //    "finalize_order_diagnosis",
-        //    ordemServico.Id,
-        //    ordemServico.VeiculoId,
-        //    ordemServico.Status);
+        using var scope = _logger.BeginScope(
+           "correlation_id={CorrelationId} event_type={EventType} operation={Operation} order_id={OrderId} vehicle_id={VehicleId} status={Status}",
+           Activity.Current?.TraceId.ToString() ?? "n/a",
+           "order_processing",
+           "finalize_order_diagnosis",
+           ordemServico.Id,
+           ordemServico.VeiculoId,
+           ordemServico.Status);
 
         if(ordemServico.Status != "Em diagnóstico")
         {
@@ -88,31 +86,31 @@ public class FinalizarDiagnosticoOSHandler
             PropertyNameCaseInsensitive = true // Ignora maiúsculas/minúsculas
         };
         var response = JsonSerializer.Deserialize<BaseResponse>(await post.Content.ReadAsStringAsync(),jsonOptions);
-        //_logger.LogInformation(
-        //    "Diagnóstico finalizado {@Diagnosis}",
-        //    new
-        //    {
-        //        OrderId = ordemServico.Id,
-        //        VehicleId = ordemServico.VeiculoId,
-        //        Status = ordemServico.Status,
-        //        Data = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-        //    });
+        _logger.LogInformation(
+           "Diagnóstico finalizado {@Diagnosis}",
+           new
+           {
+               OrderId = ordemServico.Id,
+               VehicleId = ordemServico.VeiculoId,
+               Status = ordemServico.Status,
+               Data = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+           });
         // var orcamento = new Orcamento(
         //     diagnosticoFinalizadoModel.Id,
         //     
         //aqui tem que fazer um achamada para o servico de ORCAMENTO
         await _ordemServicoRepository.Atualizar(ordemServico);
         //await _orcamentoRepository.Adicionar(orcamento);
-        // _logger.LogInformation(
-        //     "Orçamento criado {@Budget}",
-        //     new
-        //     {
-        //         TempoGasto = (DateTime.Now - ordemServico.DataAbertura).TotalMilliseconds,
-        //         OrderId = ordemServico.Id,
-        //         VehicleId = ordemServico.VeiculoId,
-        //         Status = ordemServico.Status,
-        //         BudgetId = orcamento.Id
-        //     });
+        _logger.LogInformation(
+            "Orçamento criado {@Budget}",
+            new
+            {
+                TempoGasto = (DateTime.Now - ordemServico.DataAbertura).TotalMilliseconds,
+                OrderId = ordemServico.Id,
+                VehicleId = ordemServico.VeiculoId,
+                Status = ordemServico.Status,
+                BudgetId = response.Data
+            });
         return new BaseResponse
         {
             Success = true,

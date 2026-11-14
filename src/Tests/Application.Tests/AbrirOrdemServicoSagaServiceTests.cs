@@ -7,6 +7,7 @@ using Application.Services;
 using Application.UseCases.OrdensServico;
 using Domain.Aggregates;
 using Domain.Exceptions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace Application.Tests;
@@ -40,12 +41,14 @@ public class AbrirOrdemServicoSagaServiceTests
             servicoRepository.Object,
             ordemRepository.Object,
             vehicleLookupHttpClient,
-            configuration.Object);
+            configuration.Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
         var service = new AbrirOrdemServicoSagaService(
             configuration.Object,
             sagaHttpClient,
             adicionarOrdemServicoHandler,
-            ordemRepository.Object);
+            ordemRepository.Object,
+            NullLogger<AbrirOrdemServicoSagaService>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() =>
             service.Handle(new AberturaOSRequest()));
@@ -95,12 +98,14 @@ public class AbrirOrdemServicoSagaServiceTests
             new Mock<ServicoRepository>().Object,
             ordemRepository.Object,
             vehicleLookupHttpClient,
-            configuration.Object);
+            configuration.Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
         var service = new AbrirOrdemServicoSagaService(
             configuration.Object,
             sagaHttpClient,
             adicionarOrdemServicoHandler,
-            ordemRepository.Object);
+            ordemRepository.Object,
+            NullLogger<AbrirOrdemServicoSagaService>.Instance);
 
         var exception = await Assert.ThrowsAsync<AggregateException>(() =>
             service.Handle(new AberturaOSRequest()));
@@ -169,12 +174,14 @@ public class AbrirOrdemServicoSagaServiceTests
             servicoRepository.Object,
             ordemRepository.Object,
             vehicleLookupHttpClient,
-            configuration.Object);
+            configuration.Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
         var service = new AbrirOrdemServicoSagaService(
             configuration.Object,
             sagaHttpClient,
             adicionarOrdemServicoHandler,
-            ordemRepository.Object);
+            ordemRepository.Object,
+            NullLogger<AbrirOrdemServicoSagaService>.Instance);
 
         var response = await service.Handle(new AberturaOSRequest
         {
@@ -213,12 +220,14 @@ public class AbrirOrdemServicoSagaServiceTests
             new Mock<ServicoRepository>().Object,
             ordemRepository.Object,
             vehicleLookupHttpClient,
-            configuration.Object);
+            configuration.Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
         var service = new AbrirOrdemServicoSagaService(
             configuration.Object,
             sagaHttpClient,
             adicionarOrdemServicoHandler,
-            ordemRepository.Object);
+            ordemRepository.Object,
+            NullLogger<AbrirOrdemServicoSagaService>.Instance);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.Handle(new AberturaOSRequest()));
@@ -245,12 +254,14 @@ public class AbrirOrdemServicoSagaServiceTests
             new Mock<ServicoRepository>().Object,
             ordemRepository.Object,
             vehicleLookupHttpClient,
-            configuration.Object);
+            configuration.Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
         var service = new AbrirOrdemServicoSagaService(
             configuration.Object,
             sagaHttpClient,
             adicionarOrdemServicoHandler,
-            ordemRepository.Object);
+            ordemRepository.Object,
+            NullLogger<AbrirOrdemServicoSagaService>.Instance);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.Handle(new AberturaOSRequest()));
@@ -285,8 +296,10 @@ public class AbrirOrdemServicoSagaServiceTests
                 ordemRepository.Object,
                 TestSupport.CreateHttpClient((_, _) =>
                     Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK))),
-                configuration.Object),
-            ordemRepository.Object);
+                configuration.Object,
+                NullLogger<AdicionarOrdemServicoHandler>.Instance),
+            ordemRepository.Object,
+            NullLogger<AbrirOrdemServicoSagaService>.Instance);
 
         var method = typeof(AbrirOrdemServicoSagaService).GetMethod(
             "PostWithoutResponseAsync",

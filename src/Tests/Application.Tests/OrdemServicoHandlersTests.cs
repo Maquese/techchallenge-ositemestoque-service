@@ -8,6 +8,7 @@ using Application.UseCases.OrdensServico;
 using Domain.Aggregates;
 using Domain.Entidades;
 using Domain.Exceptions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace Application.Tests;
@@ -31,7 +32,8 @@ public class OrdemServicoHandlersTests
             servicoRepository.Object,
             ordemRepository.Object,
             client,
-            TestSupport.CreateConfiguration("ClienteService", "http://cliente/").Object);
+            TestSupport.CreateConfiguration("ClienteService", "http://cliente/").Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() =>
             handler.Handle(new AddOrdemServicoRequest { VeiculoId = 12 }));
@@ -50,7 +52,8 @@ public class OrdemServicoHandlersTests
             servicoRepository.Object,
             ordemRepository.Object,
             client,
-            TestSupport.CreateConfiguration("ClienteService", "http://cliente/").Object);
+            TestSupport.CreateConfiguration("ClienteService", "http://cliente/").Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
 
         var response = await handler.Handle(new AddOrdemServicoRequest
         {
@@ -79,7 +82,8 @@ public class OrdemServicoHandlersTests
             servicoRepository.Object,
             ordemRepository.Object,
             client,
-            TestSupport.CreateConfiguration("ClienteService", "http://cliente/").Object);
+            TestSupport.CreateConfiguration("ClienteService", "http://cliente/").Object,
+            NullLogger<AdicionarOrdemServicoHandler>.Instance);
 
         await handler.Handle(new AddOrdemServicoRequest
         {
@@ -133,7 +137,9 @@ public class OrdemServicoHandlersTests
     {
         var repository = new Mock<OrdemServicoRepository>();
         repository.Setup(x => x.ObterPorId(7)).ReturnsAsync((OrdemServico)null!);
-        var handler = new AtribuirMecanicoDiagnosticoOSHandler(repository.Object);
+        var handler = new AtribuirMecanicoDiagnosticoOSHandler(
+            repository.Object,
+            NullLogger<AtribuirMecanicoDiagnosticoOSHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() => handler.Handle(
             new AtribuiMecanicoRequest { OrdemServicoId = 7, MecanicoAtribuido = "Ana" }));
@@ -146,7 +152,9 @@ public class OrdemServicoHandlersTests
         ordem.OSAprovada();
         var repository = new Mock<OrdemServicoRepository>();
         repository.Setup(x => x.ObterPorId(7)).ReturnsAsync(ordem);
-        var handler = new AtribuirMecanicoDiagnosticoOSHandler(repository.Object);
+        var handler = new AtribuirMecanicoDiagnosticoOSHandler(
+            repository.Object,
+            NullLogger<AtribuirMecanicoDiagnosticoOSHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() => handler.Handle(
             new AtribuiMecanicoRequest { OrdemServicoId = 7, MecanicoAtribuido = "Ana" }));
@@ -161,7 +169,9 @@ public class OrdemServicoHandlersTests
         var repository = new Mock<OrdemServicoRepository>();
         repository.Setup(x => x.ObterPorId(7)).ReturnsAsync(ordem);
         repository.Setup(x => x.Atualizar(ordem)).Returns(Task.CompletedTask);
-        var handler = new AtribuirMecanicoDiagnosticoOSHandler(repository.Object);
+        var handler = new AtribuirMecanicoDiagnosticoOSHandler(
+            repository.Object,
+            NullLogger<AtribuirMecanicoDiagnosticoOSHandler>.Instance);
 
         var response = await handler.Handle(
             new AtribuiMecanicoRequest { OrdemServicoId = 7, MecanicoAtribuido = "Ana" });
@@ -182,7 +192,8 @@ public class OrdemServicoHandlersTests
         var handler = new AtribuirMecanicoExecucaoOSHandler(
             repository.Object,
             client,
-            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object);
+            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object,
+            NullLogger<AtribuirMecanicoExecucaoOSHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() => handler.Handle(
             new AtribuiMecanicoRequest { OrdemServicoId = 8, MecanicoAtribuido = "Ana" }));
@@ -205,7 +216,8 @@ public class OrdemServicoHandlersTests
         var handler = new AtribuirMecanicoExecucaoOSHandler(
             repository.Object,
             client,
-            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object);
+            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object,
+            NullLogger<AtribuirMecanicoExecucaoOSHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() => handler.Handle(
             new AtribuiMecanicoRequest { OrdemServicoId = 8, MecanicoAtribuido = "Ana" }));
@@ -231,7 +243,8 @@ public class OrdemServicoHandlersTests
         var handler = new AtribuirMecanicoExecucaoOSHandler(
             repository.Object,
             client,
-            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object);
+            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object,
+            NullLogger<AtribuirMecanicoExecucaoOSHandler>.Instance);
 
         var response = await handler.Handle(
             new AtribuiMecanicoRequest { OrdemServicoId = 8, MecanicoAtribuido = "Ana" });
@@ -467,7 +480,8 @@ public class OrdemServicoHandlersTests
         ordemRepository.Setup(x => x.ObterPorId(13)).ReturnsAsync((OrdemServico)null!);
         var handler = new FinalizarOrdemServicoHandler(
             ordemRepository.Object,
-            new Mock<ItemEstoqueRepository>().Object);
+            new Mock<ItemEstoqueRepository>().Object,
+            NullLogger<FinalizarOrdemServicoHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() => handler.Handle(13));
     }
@@ -479,7 +493,8 @@ public class OrdemServicoHandlersTests
         ordemRepository.Setup(x => x.ObterPorId(13)).ReturnsAsync(new OrdemServico(1));
         var handler = new FinalizarOrdemServicoHandler(
             ordemRepository.Object,
-            new Mock<ItemEstoqueRepository>().Object);
+            new Mock<ItemEstoqueRepository>().Object,
+            NullLogger<FinalizarOrdemServicoHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() => handler.Handle(13));
     }
@@ -502,7 +517,10 @@ public class OrdemServicoHandlersTests
         var itemRepository = new Mock<ItemEstoqueRepository>();
         itemRepository.Setup(x => x.ObterPorId(14)).ReturnsAsync(item);
         itemRepository.Setup(x => x.Atualizar(item)).Returns(Task.CompletedTask);
-        var handler = new FinalizarOrdemServicoHandler(ordemRepository.Object, itemRepository.Object);
+        var handler = new FinalizarOrdemServicoHandler(
+            ordemRepository.Object,
+            itemRepository.Object,
+            NullLogger<FinalizarOrdemServicoHandler>.Instance);
 
         var response = await handler.Handle(13);
 
@@ -523,7 +541,10 @@ public class OrdemServicoHandlersTests
         ordemRepository.Setup(x => x.ObterPorId(13)).ReturnsAsync(ordem);
         var itemRepository = new Mock<ItemEstoqueRepository>();
         itemRepository.Setup(x => x.ObterPorId(14)).ReturnsAsync((ItemEstoque)null!);
-        var handler = new FinalizarOrdemServicoHandler(ordemRepository.Object, itemRepository.Object);
+        var handler = new FinalizarOrdemServicoHandler(
+            ordemRepository.Object,
+            itemRepository.Object,
+            NullLogger<FinalizarOrdemServicoHandler>.Instance);
 
         await Assert.ThrowsAsync<DomainException>(() => handler.Handle(13));
 
@@ -699,7 +720,8 @@ public class OrdemServicoHandlersTests
             servicoRepository.Object,
             itemRepository.Object,
             client,
-            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object);
+            TestSupport.CreateConfiguration("OrcamentoService", "http://orcamento/").Object,
+            NullLogger<FinalizarDiagnosticoOSHandler>.Instance);
 
     private static DiagnosticoFinalizadoRequest NewDiagnosticoRequest(int id) =>
         new()
