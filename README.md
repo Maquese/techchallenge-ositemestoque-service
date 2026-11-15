@@ -121,6 +121,7 @@ O SonarQube mostra a cobertura de 90,6% na análise do projeto:
 
 O cenário de compensação da Saga foi executado com sucesso. Veja o
 ![Evidência de cobertura dos testes BDD](docs/images/image.png)
+
 [resultado formatado](./src/Tests/Application.Tests/resultado-bdd.txt).
 
 ## Docker e Kubernetes
