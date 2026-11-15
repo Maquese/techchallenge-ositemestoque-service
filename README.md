@@ -115,7 +115,13 @@ O pipeline exige cobertura mínima de 80% de linhas para os testes de Domain e A
 O SonarQube mostra a cobertura de 90,6% na análise do projeto:
 
 ![Evidência de cobertura dos testes](docs/images/image-1.png)
-![Evidência de cobertura dos testes](docs/images/image.png)
+![Evidência de cobertura dos testes](docs/images/image-2.png)
+
+### Resultado do teste BDD
+
+O cenário de compensação da Saga foi executado com sucesso. Veja o
+![Evidência de cobertura dos testes BDD](docs/images/image.png)
+[resultado formatado](./src/Tests/Application.Tests/resultado-bdd.txt).
 
 ## Docker e Kubernetes
 
